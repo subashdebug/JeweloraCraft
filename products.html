@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop All Jewellery — JeweloraCraft</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="announce-bar">Free delivery across Pakistan on orders over PKR 5,000 &nbsp;•&nbsp; Cash on Delivery available</div>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <div class="header-inner">
+    <button class="icon-btn menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+    <a href="index.html" class="logo">Jewelora<span>Craft</span></a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html">Home</a>
+      <a href="index.html#categories">Categories</a>
+      <a href="products.html" class="active-link">Shop</a>
+      <a href="index.html#about">About</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+    <button class="icon-btn cart-btn" id="cartBtn" aria-label="Cart">
+      🛍️ <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- ===== PAGE TITLE ===== -->
+<section class="page-title">
+  <span class="eyebrow-sm">Full Collection</span>
+  <h1>All Jewellery</h1>
+  <p>Rings, bracelets, necklaces, bridal sets and craft material — browse the whole catalog.</p>
+</section>
+
+<!-- ===== SHOP ===== -->
+<section class="shop">
+  <div class="filter-row" id="filterRow"></div>
+  <div class="product-grid" id="productGrid"></div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer" id="contact">
+  <div class="footer-inner">
+    <div class="footer-col footer-brand">
+      <span class="logo">Jewelora<span>Craft</span></span>
+      <p>Handcrafted gold-plated jewellery, delivered across Pakistan.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <a href="index.html">Home</a>
+      <a href="products.html">Shop</a>
+      <a href="index.html#about">About</a>
+    </div>
+    <div class="footer-col">
+      <h4>Categories</h4>
+      <div id="footerCategoryLinks"></div>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <p>WhatsApp: +92 300 0000000</p>
+      <p>Email: hello@jeweloracraft.com</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 JeweloraCraft. All rights reserved.</span>
+    <span>Orders are placed directly through our website. &middot; <a href="warehouse.html" class="foot-admin-link">Warehouse</a></span>
+  </div>
+</footer>
+
+<!-- ===== CART DRAWER ===== -->
+<div class="overlay" id="cartOverlay">
+  <div class="drawer" id="cartDrawer">
+    <div class="drawer-head">
+      <h3>Your Bag</h3>
+      <button class="modal-close" data-close="cartOverlay">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <span id="cartTotal">PKR 0</span>
+      </div>
+      <button class="btn btn-gold btn-block" id="checkoutBtn">Checkout</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHECKOUT MODAL ===== -->
+<div class="overlay" id="checkoutOverlay">
+  <div class="modal">
+    <button class="modal-close" data-close="checkoutOverlay">✕</button>
+    <h3>Delivery Details</h3>
+    <form id="checkoutForm">
+      <label>Full Name<input type="text" id="custName" required></label>
+      <label>Phone<input type="tel" id="custPhone" required></label>
+      <label>Address<textarea id="custAddress" required rows="3"></textarea></label>
+      <button type="submit" class="btn btn-gold btn-block">Place Order</button>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="storefront.js"></script>
+</body>
+</html>

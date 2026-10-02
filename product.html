@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product — JeweloraCraft</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="store-fx.css">
+</head>
+<body>
+
+<div class="announce-bar">Free delivery across Pakistan on orders over PKR 5,000 &nbsp;•&nbsp; Cash on Delivery available</div>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <div class="header-inner">
+    <button class="icon-btn menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+    <a href="index.html" class="logo">Jewelora<span>Craft</span></a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html">Home</a>
+      <a href="index.html#categories">Categories</a>
+      <a href="products.html">Shop</a>
+      <a href="index.html#about">About</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+    <button class="icon-btn cart-btn" id="cartBtn" aria-label="Cart">
+      🛍️ <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- ===== BREADCRUMB ===== -->
+<div class="breadcrumb" id="breadcrumb"></div>
+
+<!-- ===== PRODUCT DETAIL ===== -->
+<section class="pd-section" id="pdSection"></section>
+
+<!-- ===== RELATED PRODUCTS ===== -->
+<section class="trending" id="relatedSection">
+  <div class="section-head">
+    <span class="eyebrow-sm">You May Also Like</span>
+    <h2>More From This Category</h2>
+  </div>
+  <div class="product-grid" id="relatedGrid"></div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer" id="contact">
+  <div class="footer-inner">
+    <div class="footer-col footer-brand">
+      <span class="logo">Jewelora<span>Craft</span></span>
+      <p>Handcrafted gold-plated jewellery, delivered across Pakistan.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <a href="index.html">Home</a>
+      <a href="products.html">Shop</a>
+      <a href="index.html#about">About</a>
+    </div>
+    <div class="footer-col">
+      <h4>Categories</h4>
+      <div id="footerCategoryLinks"></div>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <p>WhatsApp: +92 300 0000000</p>
+      <p>Email: hello@jeweloracraft.com</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 JeweloraCraft. All rights reserved.</span>
+    <span>Orders are placed directly through our website. &middot; <a href="warehouse.html" class="foot-admin-link">Warehouse</a></span>
+  </div>
+</footer>
+
+<!-- ===== CART DRAWER ===== -->
+<div class="overlay" id="cartOverlay">
+  <div class="drawer" id="cartDrawer">
+    <div class="drawer-head">
+      <h3>Your Bag</h3>
+      <button class="modal-close" data-close="cartOverlay">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <span id="cartTotal">PKR 0</span>
+      </div>
+      <button class="btn btn-gold btn-block" id="checkoutBtn">Checkout</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-sync.js"></script>
+<script src="storefront.js"></script>
+<script src="store-fx.js"></script>
+<script>
+window.addEventListener("db-synced", () => location.reload());
+/* ============================================================
+   Single-product page — reads ?id= and renders detail + related
+   ============================================================ */
+(function () {
+  const id = new URLSearchParams(location.search).get("id");
+  const p = products.find(p => p.id === id);
+  const section = document.getElementById("pdSection");
+  const crumb = document.getElementById("breadcrumb");
+
+  if (!p) {
+    section.innerHTML = `<div class="wh-empty" style="max-width:600px;margin:60px auto;">🔍<h3>Product not found</h3><p>It may have been removed. <a href="products.html">Back to shop</a></p></div>`;
+    crumb.innerHTML = `<a href="index.html">Home</a> / <a href="products.html">Shop</a>`;
+    document.getElementById("relatedSection").style.display = "none";
+    return;
+  }
+
+  document.title = p.name + " — JeweloraCraft";
+  const catName = categoryName(categories, p.category);
+
+  crumb.innerHTML = `<a href="index.html">Home</a> / <a href="products.html">Shop</a> / <a href="products.html?category=${encodeURIComponent(p.category)}">${esc(catName)}</a> / <span>${esc(p.name)}</span>`;
+
+  let selectedSize = p.sizes[0];
+
+  section.innerHTML = `
+    <div class="pd-grid">
+      <div class="pd-image"><img src="${p.image}" alt="${esc(p.name)}"></div>
+      <div class="pd-info">
+        <div class="product-cat">${esc(catName)}</div>
+        <h1>${esc(p.name)}</h1>
+        <div class="price-row">
+          <span class="price-now">${fmt(p.discountPrice)}</span>
+          <span class="price-was">${fmt(p.price)}</span>
+        </div>
+        ${p.stock <= 6 ? `<div class="stock-low">${p.stock === 0 ? "Out of stock" : "Only " + p.stock + " left in stock"}</div>` : ""}
+        <p class="desc">${esc(p.desc)}</p>
+        <div class="meta">Material: ${esc(p.material)}</div>
+        <div class="meta">SKU: ${esc(p.sku)}</div>
+        <div class="size-row" id="pdSizeRow">
+          ${p.sizes.map((s, i) => `<span class="size-pill ${i === 0 ? "active" : ""}" data-size="${esc(s)}">${esc(s)}</span>`).join("")}
+        </div>
+        <button class="btn btn-gold btn-block" id="pdAddBtn" ${p.stock === 0 ? "disabled" : ""}>${p.stock === 0 ? "Out of Stock" : "Add to Bag"}</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("pdSizeRow").querySelectorAll(".size-pill").forEach(el => {
+    el.addEventListener("click", () => {
+      document.querySelectorAll("#pdSizeRow .size-pill").forEach(x => x.classList.remove("active"));
+      el.classList.add("active");
+      selectedSize = el.dataset.size;
+    });
+  });
+  const addBtn = document.getElementById("pdAddBtn");
+  if (addBtn && !addBtn.disabled) {
+    addBtn.addEventListener("click", () => addToCart(p.id, selectedSize, 1));
+  }
+
+  const relatedGrid = document.getElementById("relatedGrid");
+  const related = products.filter(x => x.category === p.category && x.id !== p.id).slice(0, 4);
+  if (related.length === 0) {
+    document.getElementById("relatedSection").style.display = "none";
+  } else {
+    relatedGrid.innerHTML = related.map(productCardHTML).join("");
+    wireProductGrid(relatedGrid);
+  }
+})();
+</script>
+</body>
+</html>

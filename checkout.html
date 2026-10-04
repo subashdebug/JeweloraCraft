@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — JeweloraCraft</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="store-fx.css">
+<style>
+.co-wrap{max-width:1080px;margin:0 auto;padding:36px 20px 70px}
+.co-back{display:inline-block;color:var(--muted);font-size:.9rem;margin-bottom:14px}
+.co-back:hover{color:var(--gold)}
+.co-title{font-family:"Playfair Display",serif;font-size:2rem;margin-bottom:24px}
+.co-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:24px;align-items:start}
+.co-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.co-card h3{font-size:.95rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:18px}
+.co-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.co-card label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:16px}
+.co-card label i{color:#E08A8A;font-style:normal}
+.co-card input[type=text],.co-card input[type=tel],.co-card select{display:block;width:100%;margin-top:6px;padding:12px 14px;background:var(--panel-3);border:1px solid var(--border);border-radius:10px;color:var(--text);font:inherit}
+.co-card input:focus,.co-card select:focus{outline:none;border-color:var(--gold)}
+.co-card select:disabled{opacity:.55}
+.co-hint{color:var(--muted);font-size:.76rem;margin:-10px 0 16px}
+.co-card .co-opt{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;cursor:pointer;font-size:.9rem;color:var(--text)}
+.co-opt.sel{border-color:var(--gold);background:rgba(212,175,55,.06)}
+.co-card .co-opt input{width:auto;flex:none;margin:3px 0 0;padding:0;accent-color:#D4AF37}
+.co-opt .t{flex:1}.co-opt .t small{display:block;color:var(--muted);margin-top:3px;font-size:.78rem}
+.co-opt .p{font-weight:600;white-space:nowrap}
+.co-opt.locked{cursor:default}
+.co-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.co-item img{width:68px;height:68px;object-fit:cover;border-radius:10px}
+.co-item .info{flex:1;font-size:.92rem}
+.co-item .sub{color:var(--muted);font-size:.8rem;margin-top:2px}
+.co-item .line{font-weight:600;white-space:nowrap}
+.co-promo{display:flex;gap:10px;margin:16px 0 4px}
+.co-promo input{flex:1;margin:0 !important}
+.co-promo-msg{font-size:.78rem;min-height:1em;margin-bottom:6px}
+.co-promo-msg.ok{color:#7FD08A}.co-promo-msg.bad{color:#E08A8A}
+.co-sum{padding-top:10px}
+.co-sum div{display:flex;justify-content:space-between;font-size:.9rem;padding:6px 0;color:var(--muted)}
+.co-sum .disc{color:#7FD08A}
+.co-sum .tot{color:var(--text);font-size:1.15rem;font-weight:600;border-top:1px solid var(--border);margin-top:8px;padding-top:14px}
+.co-note{color:var(--muted);font-size:.78rem;margin-top:12px;line-height:1.5;text-align:center}
+.co-empty{text-align:center;padding:60px 20px}
+.co-empty h2{font-family:"Playfair Display",serif;margin-bottom:10px}
+.co-empty p{color:var(--muted);margin-bottom:20px;line-height:1.6}
+.co-empty .btn{margin:4px}
+@media(max-width:860px){.co-grid{grid-template-columns:1fr}}
+@media(max-width:520px){.co-row{grid-template-columns:1fr}.co-card{padding:18px}}
+</style>
+</head>
+<body>
+
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <a href="index.html" class="logo">Jewelora<span>Craft</span></a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html">Home</a>
+      <a href="products.html">Shop</a>
+    </nav>
+  </div>
+</header>
+
+<main class="co-wrap" id="checkoutRoot"></main>
+
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-sync.js"></script>
+<script>
+/* ============ SETTINGS you can edit ============ */
+// Your store's WhatsApp number in international format, digits only (e.g. 923001234567).
+// Leave empty to hide the "Chat with us on WhatsApp" button.
+const STORE_WHATSAPP = "";
+
+// Delivery options shown at checkout. Change labels / prices here.
+const SHIPPING = [
+  { id: "standard", label: "Standard Delivery", note: "", price: 0 },   // change the price here if you charge for delivery
+];
+
+// Promo codes. Leave empty {} to hide the promo box.
+// Example: { "WELCOME10": { type: "percent", value: 10 }, "SAVE500": { type: "fixed", value: 500 } }
+const PROMO_CODES = {};
+/* ================================================ */
+
+const PK = {
+  "Punjab": ["Lahore","Faisalabad","Rawalpindi","Multan","Gujranwala","Sialkot","Bahawalpur","Sargodha","Sheikhupura","Jhang","Gujrat","Sahiwal","Rahim Yar Khan","Okara","Kasur","Dera Ghazi Khan","Mianwali","Chiniot","Attock","Jhelum"],
+  "Sindh": ["Karachi","Hyderabad","Sukkur","Larkana","Nawabshah","Mirpur Khas","Jacobabad","Shikarpur","Khairpur","Thatta","Dadu","Badin"],
+  "Khyber Pakhtunkhwa": ["Peshawar","Mardan","Abbottabad","Swat (Mingora)","Kohat","Mansehra","Dera Ismail Khan","Nowshera","Charsadda","Swabi","Bannu"],
+  "Balochistan": ["Quetta","Gwadar","Turbat","Khuzdar","Hub","Chaman","Sibi","Zhob"],
+  "Islamabad Capital Territory": ["Islamabad"],
+  "Azad Jammu & Kashmir": ["Muzaffarabad","Mirpur","Kotli","Bagh","Rawalakot"],
+  "Gilgit-Baltistan": ["Gilgit","Skardu","Hunza","Chilas"],
+};
+
+const products = DB.getProducts();
+let cart = DB.getCart();
+let shipId = SHIPPING[0].id;
+let promo = null;                       // { code, type, value }
+const root = document.getElementById("checkoutRoot");
+
+const cartLines = () => cart.map(c => { const p = products.find(p => p.id === c.id); return p ? { c, p } : null; }).filter(Boolean);
+const subtotal = () => cartLines().reduce((s, { c, p }) => s + p.discountPrice * c.qty, 0);
+const shipping = () => SHIPPING.find(x => x.id === shipId) || SHIPPING[0];
+function discount() {
+  if (!promo) return 0;
+  const sub = subtotal();
+  const d = promo.type === "percent" ? Math.round(sub * promo.value / 100) : promo.value;
+  return Math.min(d, sub);
+}
+const grandTotal = () => subtotal() - discount() + shipping().price;
+
+function renderEmpty() {
+  root.innerHTML = `<div class="co-empty">
+    <h2>Your bag is empty</h2>
+    <p>Add something beautiful before checking out.</p>
+    <a class="btn btn-gold" href="products.html">Browse the Shop</a></div>`;
+}
+
+function renderPage() {
+  if (cartLines().length === 0) return renderEmpty();
+  const hasPromo = Object.keys(PROMO_CODES).length > 0;
+  root.innerHTML = `
+    <a class="co-back" href="products.html">← Continue shopping</a>
+    <h1 class="co-title">Checkout</h1>
+    <form id="checkoutForm" class="co-grid" novalidate>
+      <div>
+        <div class="co-card">
+          <h3>Customer Details</h3>
+          <div class="co-row">
+            <label>First Name <i>*</i><input type="text" id="firstName" maxlength="80" autocomplete="given-name"></label>
+            <label>Last Name <i>*</i><input type="text" id="lastName" maxlength="80" autocomplete="family-name"></label>
+          </div>
+          <label>Mobile Number (WhatsApp) <i>*</i><input type="tel" id="custPhone" maxlength="20" placeholder="03XX XXXXXXX" autocomplete="tel"></label>
+          <p class="co-hint">Payment details will be sent to this number on WhatsApp.</p>
+          <label>Street Address <i>*</i><input type="text" id="custStreet" maxlength="250" autocomplete="street-address"></label>
+          <div class="co-row">
+            <label>Country <i>*</i><select id="country" disabled><option>Pakistan</option></select></label>
+            <label>State / Province <i>*</i>
+              <select id="province"><option value="">Select Your Region</option>
+                ${Object.keys(PK).map(p => `<option>${esc(p)}</option>`).join("")}</select></label>
+          </div>
+          <label>City <i>*</i><select id="city" disabled><option value="">Select Your City</option></select></label>
+        </div>
+
+        <div class="co-card">
+          <h3>Shipping Method</h3>
+          <div id="shipOpts"></div>
+        </div>
+
+        <div class="co-card">
+          <h3>Payment Method</h3>
+          <div class="co-opt sel locked">
+            <input type="radio" checked disabled>
+            <div class="t">Online Payment<small>After you place the order, our team will send you the billing &amp; payment details on WhatsApp.</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="co-card" style="position:sticky;top:90px">
+        <h3>Your Bag (${cartLines().length})</h3>
+        <div id="items"></div>
+        ${hasPromo ? `<div class="co-promo">
+          <input type="text" id="promoInput" placeholder="Promo code" maxlength="30" style="padding:12px 14px;background:var(--panel-3);border:1px solid var(--border);border-radius:10px;color:var(--text);font:inherit">
+          <button type="button" class="btn btn-outline" id="promoBtn">Apply</button></div>
+          <div class="co-promo-msg" id="promoMsg"></div>` : ""}
+        <div class="co-sum" id="sum"></div>
+        <button type="submit" class="btn btn-gold btn-block" id="placeBtn" style="margin-top:18px">Place Order</button>
+        <p class="co-note">Payment is online only. We'll message you the payment details on WhatsApp right after your order.</p>
+      </div>
+    </form>`;
+
+  document.getElementById("province").addEventListener("change", onProvince);
+  document.getElementById("checkoutForm").addEventListener("submit", placeOrder);
+  const pb = document.getElementById("promoBtn");
+  if (pb) pb.addEventListener("click", applyPromo);
+  drawShipping(); drawItems(); drawSummary();
+}
+
+function onProvince(e) {
+  const city = document.getElementById("city");
+  const list = PK[e.target.value] || [];
+  city.innerHTML = `<option value="">Select Your City</option>` + list.map(c => `<option>${esc(c)}</option>`).join("");
+  city.disabled = !list.length;
+}
+
+function drawShipping() {
+  document.getElementById("shipOpts").innerHTML = SHIPPING.map(o => `
+    <label class="co-opt ${o.id === shipId ? "sel" : ""}">
+      ${SHIPPING.length > 1 ? `<input type="radio" name="ship" value="${o.id}" ${o.id === shipId ? "checked" : ""}>` : ""}
+      <div class="t">${esc(o.label)}${o.note ? `<small>${esc(o.note)}</small>` : ""}</div>
+      <div class="p">${fmt(o.price)}</div>
+    </label>`).join("");
+  document.querySelectorAll('input[name="ship"]').forEach(r => r.addEventListener("change", () => {
+    shipId = r.value; drawShipping(); drawSummary();
+  }));
+}
+
+function drawItems() {
+  document.getElementById("items").innerHTML = cartLines().map(({ c, p }) => `
+    <div class="co-item">
+      <img src="${p.image}" alt="${esc(p.name)}">
+      <div class="info">${esc(p.name)}
+        ${c.size ? `<div class="sub">Size: ${esc(c.size)}</div>` : ""}
+        <div class="sub">Qty: ${c.qty} × ${fmt(p.discountPrice)}</div>
+      </div>
+      <div class="line">${fmt(p.discountPrice * c.qty)}</div>
+    </div>`).join("");
+}
+
+function drawSummary() {
+  const d = discount();
+  document.getElementById("sum").innerHTML = `
+    <div><span>Subtotal</span><span>${fmt(subtotal())}</span></div>
+    ${d ? `<div class="disc"><span>Discount (${esc(promo.code)})</span><span>− ${fmt(d)}</span></div>` : ""}
+    <div><span>Shipping</span><span>${fmt(shipping().price)}</span></div>
+    <div class="tot"><span>Total</span><span>${fmt(grandTotal())}</span></div>`;
+}
+
+function applyPromo() {
+  const code = document.getElementById("promoInput").value.trim().toUpperCase();
+  const msg = document.getElementById("promoMsg");
+  const found = PROMO_CODES[code];
+  if (!found) { promo = null; msg.className = "co-promo-msg bad"; msg.textContent = code ? "That code isn't valid." : "Enter a code first."; }
+  else { promo = { code, type: found.type, value: found.value }; msg.className = "co-promo-msg ok"; msg.textContent = "Promo code applied!"; }
+  drawSummary();
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 3200);
+}
+const val = id => document.getElementById(id).value.trim();
+
+async function placeOrder(e) {
+  e.preventDefault();
+  const lines = cartLines();
+  if (lines.length === 0) return renderEmpty();
+
+  const first = val("firstName"), last = val("lastName"), phone = val("custPhone"),
+        street = val("custStreet"), province = val("province"), city = val("city");
+  const digits = phone.replace(/\D/g, "");
+  if (!first || !last) return toast("Please enter your first and last name.");
+  if (!/^(92|0)?3\d{9}$/.test(digits)) return toast("Enter a valid mobile number, e.g. 03001234567.");
+  if (!street) return toast("Please enter your street address.");
+  if (!province) return toast("Please select your province.");
+  if (!city) return toast("Please select your city.");
+
+  const btn = document.getElementById("placeBtn");
+  btn.disabled = true; btn.textContent = "Placing order…";
+
+  const ship = shipping(), d = discount();
+  const items = lines.map(({ c, p }) => ({ id: c.id, name: p.name, size: c.size || "", qty: c.qty, price: p.discountPrice }));
+  if (ship.price > 0) items.push({ id: "_shipping", name: "Shipping — " + ship.label, size: "", qty: 1, price: ship.price });
+  if (d > 0) items.push({ id: "_discount", name: "Discount (" + promo.code + ")", size: "", qty: 1, price: -d });
+
+  const order = {
+    id: uid("ORD"),
+    date: new Date().toISOString(),
+    customer: {
+      name: first + " " + last,
+      phone,
+      address: `${street}, ${city}, ${province}, Pakistan`,
+      city, province,
+      shipping: ship.label,
+      payment: "Online (details via WhatsApp)",
+    },
+    items,
+    total: grandTotal(),
+    status: "pending",
+  };
+
+  try {
+    await JCFB.addOrder(order);          // saved to Firestore -> shows in the warehouse
+  } catch (err) {
+    console.error(err);
+    btn.disabled = false; btn.textContent = "Place Order";
+    return toast("Could not place the order. Check your internet and try again.");
+  }
+
+  try {
+    fetch("/api/notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "order", order }),
+    }).catch(() => {});
+  } catch (_) {}
+
+  cart = []; DB.setCart(cart);
+
+  const waText = encodeURIComponent(`Assalam o Alaikum! I placed order ${order.id} on JeweloraCraft (${fmt(order.total)}). Please share the payment details.`);
+  root.innerHTML = `<div class="co-empty">
+    <h2>Thank you, order placed! ✨</h2>
+    <p>Your order ID is <b>${esc(order.id)}</b>.<br>
+    Our team will send the billing &amp; payment details to <b>${esc(phone)}</b> on <b>WhatsApp</b> shortly.<br>
+    Your order is confirmed once the payment is received.</p>
+    ${STORE_WHATSAPP ? `<a class="btn btn-gold" target="_blank" rel="noopener" href="https://wa.me/${STORE_WHATSAPP}?text=${waText}">💬 Chat with us on WhatsApp</a>` : ""}
+    <a class="btn btn-outline" href="index.html">Back to Home</a></div>`;
+  window.scrollTo(0, 0);
+}
+
+// refresh prices/stock if the warehouse changed them, without wiping what the customer typed
+window.addEventListener("db-synced", () => {
+  products.length = 0; DB.getProducts().forEach(p => products.push(p));
+  if (document.getElementById("items")) { drawItems(); drawSummary(); }
+});
+
+renderPage();
+</script>
+</body>
+</html>

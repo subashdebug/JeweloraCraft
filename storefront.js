@@ -125,6 +125,12 @@ function renderPromoCards() {
   `).join("");
 }
 
+/* "Handmade designs" number on the homepage = how many products are in the warehouse right now */
+function renderProductCount() {
+  const el = document.getElementById("productCount");
+  if (el) el.textContent = String(products.length);
+}
+
 function renderFooterCategoryLinks() {
   const footLinks = document.getElementById("footerCategoryLinks");
   if (!footLinks) return;
@@ -368,6 +374,7 @@ function toast(msg) {
 renderCategoryBar();
 renderCategories();
 renderPromoCards();
+renderProductCount();
 renderFooterCategoryLinks();
 renderFilters();
 renderProducts();
@@ -381,6 +388,6 @@ window.addEventListener("db-synced", () => {
   const kept = validCart();
   if (kept.length !== cart.length) { cart = kept; DB.setCart(cart); }
   categories = DB.getCategories();
-  renderCategoryBar(); renderCategories(); renderPromoCards(); renderFooterCategoryLinks(); renderFilters();
+  renderCategoryBar(); renderCategories(); renderPromoCards(); renderProductCount(); renderFooterCategoryLinks(); renderFilters();
   renderProducts(); renderTrending(); renderCart();
 });

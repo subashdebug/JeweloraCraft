@@ -633,6 +633,17 @@ function renderCategories() {
       </div>
       <button class="btn btn-gold btn-sm" type="submit">Add Category</button>
     </form>
+    <div class="wh-card add-item-form">
+      <h3>Homepage Banners</h3>
+      <p class="muted" style="margin-bottom:10px">Choose which category each of the two banner cards on the homepage shows. The banner uses that category's photo, name and link. You can change it any time.</p>
+      <div class="form-row">
+        ${[1, 2].map(n => `<label>Banner ${n}
+          <select data-promo-slot="${n}">
+            <option value="">— Not set —</option>
+            ${categories.map(c => `<option value="${c.id}" ${c.promo === n ? "selected" : ""}>${esc(c.name)}</option>`).join("")}
+          </select></label>`).join("")}
+      </div>
+    </div>
     <p class="muted" style="margin:10px 0">All categories appear in the website menu bar. Tick <b>Show on homepage</b> for up to 3 of them (${categories.filter(c => c.home).length}/3 ticked) — only those appear as tiles on the homepage.</p>
     <ul class="wh-list cat-list">
       ${categories.map(c => {
@@ -1169,6 +1180,15 @@ function bindViewEvents() {
     }
     c.home = cb.checked; DB.setCategories(categories);
     toast(c.home ? "Will show on homepage" : "Removed from homepage"); goTo("categories");
+  }));
+  app.querySelectorAll("[data-promo-slot]").forEach(sel => sel.addEventListener("change", () => {
+    const slot = Number(sel.dataset.promoSlot);
+    categories.forEach(c => { if (c.promo === slot) delete c.promo; });
+    const c = categories.find(c => c.id === sel.value);
+    if (c) c.promo = slot;                       // a category can only sit in one banner
+    DB.setCategories(categories);
+    toast(c ? "Banner " + slot + " will show " + c.name : "Banner " + slot + " cleared");
+    goTo("categories");
   }));
   app.querySelectorAll("[data-rename-cat]").forEach(btn => btn.addEventListener("click", () => {
     const c = categories.find(c => c.id === btn.dataset.renameCat);

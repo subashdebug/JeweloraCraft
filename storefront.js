@@ -108,6 +108,23 @@ function renderCategories() {
   `).join("");
 }
 
+/* Two promo cards on the homepage show the categories the owner picked in the
+   warehouse (Categories > Homepage banners). Each card uses only that category's own photo.
+   If nothing is picked yet, the built-in cards in index.html stay as they are. */
+function renderPromoCards() {
+  const row = document.getElementById("promoRow");
+  if (!row) return;
+  const picked = [1, 2].map(n => categories.find(c => c.promo === n)).filter(Boolean);
+  if (!picked.length) return;
+  row.innerHTML = picked.map(c => `
+    <div class="promo-card" style="background-image:linear-gradient(0deg, rgba(0,0,0,.75), rgba(0,0,0,.15))${c.image ? `, url('${String(c.image).replace(/'/g, "%27")}')` : ""}">
+      <h3>${esc(c.name)}</h3>
+      <p>Explore our ${esc(c.name)} collection.</p>
+      <a href="products.html?category=${encodeURIComponent(c.id)}" class="btn btn-outline">Shop ${esc(c.name)}</a>
+    </div>
+  `).join("");
+}
+
 function renderFooterCategoryLinks() {
   const footLinks = document.getElementById("footerCategoryLinks");
   if (!footLinks) return;
@@ -350,6 +367,7 @@ function toast(msg) {
    ============================================================ */
 renderCategoryBar();
 renderCategories();
+renderPromoCards();
 renderFooterCategoryLinks();
 renderFilters();
 renderProducts();
@@ -363,6 +381,6 @@ window.addEventListener("db-synced", () => {
   const kept = validCart();
   if (kept.length !== cart.length) { cart = kept; DB.setCart(cart); }
   categories = DB.getCategories();
-  renderCategoryBar(); renderCategories(); renderFooterCategoryLinks(); renderFilters();
+  renderCategoryBar(); renderCategories(); renderPromoCards(); renderFooterCategoryLinks(); renderFilters();
   renderProducts(); renderTrending(); renderCart();
 });

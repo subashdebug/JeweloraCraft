@@ -69,8 +69,20 @@ html{scroll-behavior:smooth;}
 .price-now{color:var(--gold-soft);font-size:1.05rem;}
 
 /* promo + about + testimonials + newsletter */
-.promo-card{background-size:100%;transition:background-size .8s cubic-bezier(.22,1,.36,1),transform .4s,box-shadow .4s;border:1px solid var(--border);}
-.promo-card:hover{background-size:112%;transform:translateY(-4px);box-shadow:0 20px 44px rgba(0,0,0,.5);}
+/* promo cards (Necklace / Anklets etc.): the photo sits on a ::before layer that zooms with a GPU transform, so hover is smooth */
+.promo-card{position:relative;overflow:hidden;isolation:isolate;border:1px solid var(--border);
+  transition:transform .5s cubic-bezier(.22,1,.36,1),box-shadow .5s cubic-bezier(.22,1,.36,1),border-color .4s ease;}
+.promo-card::before{content:"";position:absolute;inset:0;z-index:-1;background:inherit;background-size:cover;background-position:center;
+  transform:scale(1);transition:transform .9s cubic-bezier(.22,1,.36,1);will-change:transform;}
+.promo-card::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .5s ease;
+  background:radial-gradient(ellipse at 50% 120%,rgba(212,175,55,.28),transparent 65%);}
+.promo-card h3,.promo-card p,.promo-card .btn{transition:transform .5s cubic-bezier(.22,1,.36,1),color .3s ease,border-color .3s ease,background-color .3s ease,box-shadow .3s ease;}
+.promo-card:hover{transform:translateY(-6px);border-color:rgba(212,175,55,.6);box-shadow:0 20px 44px rgba(0,0,0,.5),0 0 28px rgba(212,175,55,.12);}
+.promo-card:hover::before{transform:scale(1.08);}
+.promo-card:hover::after{opacity:1;}
+.promo-card:hover h3{transform:translateY(-4px);}
+.promo-card:hover p{transform:translateY(-4px);}
+.promo-card:hover .btn-outline{border-color:var(--gold);color:var(--gold-soft,#F3DC8A);background-color:rgba(212,175,55,.12);}
 .about{background:radial-gradient(ellipse at 15% 0%,rgba(212,175,55,.09),transparent 55%),linear-gradient(180deg,#0E0E0E,#0A0A0A);}
 .about-stats strong{font-family:'Playfair Display',serif;font-size:2.4rem;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
 .testimonial-card{background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid rgba(212,175,55,.2);transition:transform .4s,border-color .3s,box-shadow .4s;}

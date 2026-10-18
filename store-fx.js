@@ -14,7 +14,18 @@
 
   if (!("IntersectionObserver" in window)) return;
   var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var el = e.target;
+      el.classList.add("in"); io.unobserve(el);
+      /* Once the entrance animation has finished, drop the reveal classes so the card's own
+         hover transitions (shadow, lift, zoom) take over instead of the slow reveal transition. */
+      var delay = (parseFloat(el.style.getPropertyValue("--d")) || 0) * 1000;
+      setTimeout(function () {
+        el.classList.remove("fx-reveal", "in");
+        el.style.removeProperty("--d");
+      }, delay + 900);
+    });
   }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
   var SEL = ".section-head, .category-card, .product-card, .promo-card, .about-inner, .testimonial-card, .newsletter > *, .page-title, .filter-row";
   function scan() {

@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /warehouse.html
-Disallow: /bill.html
-Disallow: /checkout.html
-Disallow: /functions/
-
-Sitemap: https://jeweloracraft.pages.dev/sitemap.xml

@@ -1,0 +1,8 @@
+# JeweloraCraft
+
+> Handcrafted gold-plated jewellery, bridal and festive sets, and craft materials, made in Pakistan with delivery nationwide.
+
+## Pages
+
+- [Home](https://jeweloracraft.pages.dev/): Featured collections, categories and trending pieces
+- [Shop](https://jeweloracraft.pages.dev/products.html): Full catalogue of jewellery and craft material
